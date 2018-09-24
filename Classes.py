@@ -18,59 +18,40 @@ class Species:
 
 
 class Genome:
-    genes = new List<Gene>();
-    double fitness = 0;
-    double adjustedFitness = 0;
-    NeuralNet network = new NeuralNet();
-    int maxneuron = 0;
-    int globalRank = 0;
-    DataTable mutationRates;
-    Genome(double conChance, double linkChance, double biasChance, double nodeChance, double enableChance, double disableChance, double stepSize)
-    {
-        mutationRates = new DataTable();
-        DataColumn cl = new DataColumn("connections");
-        DataColumn c2 = new DataColumn("link");
-        DataColumn c3 = new DataColumn("bias");
-        DataColumn c4 = new DataColumn("node");
-        DataColumn c5 = new DataColumn("enable");
-        DataColumn c6 = new DataColumn("disable");
-        DataColumn c7 = new DataColumn("step");
-        mutationRates.Columns.Add(cl);
-        mutationRates.Columns.Add(c2);
-        mutationRates.Columns.Add(c3);
-        mutationRates.Columns.Add(c4);
-        mutationRates.Columns.Add(c5);
-        mutationRates.Columns.Add(c6);
-        mutationRates.Columns.Add(c7);
-        DataRow row = mutationRates.NewRow();
-        row["connections"] = conChance;
-        row["link"] = linkChance;
-        row["bias"] = biasChance;
-        row["node"] = nodeChance;
-        row["enable"] = enableChance;
-        row["disable"] = disableChance;
-        row["step"] = stepSize;
-        mutationRates.Rows.Add(row);
-    }
 
-}
-class Gene
-{
-    int into = 0;
-    int outo = 0;
-    double weight = 0.0;
-    bool enabled = true;
-    int innovation = 0;
-}
+    def __init__(self, conChance, linkChance, biasChance, nodeChance, enableChance, disableChance, stepSize):
+        self.genes = []
+        self.fitness = 0.0;
+        self.adjustedFitness = 0.0;
+        self.network = NeuralNet();
+        self.maxneuron = 0;
+        self.globalRank = 0;
+        self.mutationRates = {}
+        self.mutationRates["connections"] = conChance;
+        self.mutationRates["link"] = linkChance;
+        self.mutationRates["bias"] = biasChance;
+        self.mutationRates["node"] = nodeChance;
+        self.mutationRates["enable"] = enableChance;
+        self.mutationRates["disable"] = disableChance;
+        self.mutationRates["step"] = stepSize;
 
-class NeuralNet
-{
-    List<Neuron> neurons = new List<Neuron>();
-}
+class Gene:
+    def __init__(self):
+        self.into = 0;
+        self.outo = 0;
+        self.weight = 0.0;
+        self.enabled = True;
+        self.innovation = 0;
 
-class Neuron
-{
-    List<Gene> incoming = new List<Gene>();
-    Point loc;
-    double value = 0;
-}
+
+class NeuralNet:
+   def __init__(self):
+       neurons = []
+
+
+class Neuron:
+    def __init__(self):
+        self.incoming = []
+        self.loc = None
+        self.value = 0.0;
+
