@@ -1,6 +1,7 @@
 import math
 import random
 from Classes import *
+from pyautogui import *
 
 Inputs = 10; #169 inputs and 1 bias
 Outputs = 9; #8 controller keys
@@ -141,9 +142,11 @@ def NewNeuron():
 
 #creates a neural network based off a genome's connections and neurons
 def GenerateNetwork(genome):
-
+    global Outputs
+    global Inputs
+    global MaxNodes
     network = NeuralNet();
-    network.neurons = List<Neuron>(Neuron[MaxNodes + Outputs]);
+    network.neurons = [] * (MaxNodes + Outputs)
     for i in range(MaxNodes + Outputs):
         network.neurons[i] = None;
 
@@ -200,7 +203,7 @@ def EvaluateNetwork(network, inputs):
             neuron.value = Sigmoid(sum);
         
     
-    outputs = List<bool>();
+    outputs = []
     for o in range(Outputs):
 
         if (network.neurons[MaxNodes + o].value > 0):
@@ -512,7 +515,7 @@ def Mutate(genome):
     p = genome.mutationRates["node"]
     while (p > 0):
     
-        if (random.random() < p)
+        if (random.random() < p):
         
             NodeMutate(genome);
         
@@ -692,7 +695,7 @@ def RemoveStaleSpecies():
         
             species.staleness = species.staleness + 1;
         
-        if (species.staleness < Stale|| species.topFitness >= pool.maxFitness):
+        if (species.staleness < Stale or species.topFitness >= pool.maxFitness):
         
             survived.append(species);
         
@@ -732,7 +735,7 @@ def AddToSpecies(child):
     
         childSpecies = NewSpecies();
         childSpecies.genomes.append(child);
-        pool.species.append((childSpecies);
+        pool.species.append(childSpecies);
     
 
 
@@ -782,7 +785,7 @@ def NewGeneration():
 def InitializePool():
     global pool
     pool = NewPool();
-    for i in range(Population):)
+    for i in range(Population):
         basic = BasicGenome();
         AddToSpecies(basic);
     
@@ -790,252 +793,222 @@ def InitializePool():
 
 
 #generate a network for the current genome
-InitializeRun()
-
+def InitializeRun():
+    global pool
     species = pool.species[pool.currentSpecies];
     genome = species.genomes[pool.currentGenome];
     GenerateNetwork(genome);
 
 #evaluate the fitness of the current genome
-EvaluateCurrent(object d)
+def EvaluateCurrent(d):
 
-    int[] data = (int[])d;
-    sp = (int)data[0];
-    g = (int)data[1];
+    data = d;
+    sp = data[0];
+    g = data[1];
     EvaluateMario();
     print("Evaluated");
-    ThreadCount++;
+    ThreadCount+= 1;
 
 
 #determine the fitness of the current genome for mario
-EvaluateMario()
-
+def EvaluateMario():
+    global xPressed
+    global sPressed
+    global zPressed
+    global aPressed
+    global uPressed
+    global dPressed
+    global lPressed
+    global rPressed
     species = pool.species[pool.currentSpecies];
     genome = species.genomes[pool.currentGenome];
     GenerateNetwork(genome);
 
     #gui controls
-    Form1.Best= pool.currentGenome;
-    Form1.BestFitness = pool.maxFitness;
-    Form1.SpeciesCount = pool.currentSpecies;
-    Form1.SpeciesTot = pool.species.Count;
-    Form1.CurrentGen = pool.generation;
-    Form1.OverrideBest(genome);
+    # Form1.Best= pool.currentGenome;
+    # Form1.BestFitness = pool.maxFitness;
+    # Form1.SpeciesCount = pool.currentSpecies;
+    # Form1.SpeciesTot = pool.species.Count;
+    # Form1.CurrentGen = pool.generation;
+    # Form1.OverrideBest(genome);
 
     fitness = 0;
-    while (Form1.alive == False)
-    
+    while (Form1.alive):
+        Form1.ActivateApp("EmuHawk");
+        inputt = [[]]
+        for i in range(len(Form1.inputs)):
+            inputt.append([])
+        inputs = []
+        Form1.inputs = inputt.copy()
+        for i in range(len(inputt)):
+            for p in range(len(inputt[0])):
+                inputs.append(inputt[i][p]);
 
-    
-    while (Form1.alive)
-    
-        try
-        
-            Form1.ActivateApp("EmuHawk");
-            int[][] inputt = int[Form1.inputs.Length][];
-            inputs = List<double>();
-            Array.Copy(Form1.inputs, inputt, Form1.inputs.Length);
-            for (i = 0; i < inputt.Length; i++)
-            
-                for (p = 0; p < inputt[0].Length; p++)
-                
-                    inputs.Add(inputt[i][p]);
-                
-            
-            #get buttons to press
-            output = EvaluateNetwork(genome.network, inputs);
-            if(fitness == 0 && output[7] == False)
-            
-                Form1.alive = False;
-                continue;
-            
-            string str = "";
-            if (output[0] == True)
-            
-                str += "x";
-            
-            if (output[1] == True)
-            
-                str += "s";
-            
-            if (output[2] == True)
-            
-                str += "a";
-            
-            if (output[3] == True)
-            
-                str += "z";
-            
-            if (output[4] == True)
-            
-                str += "u";
-            
-            if (output[5] == True)
-            
-                str += "d";
-            
-            if (output[6] == True)
-            
-                str += "l";
-            
-            if (output[7] == True)
-            
-                str += "r";
-            
-            Form1.InputString = str;
-            if (output[0] == True && xPressed == False)
-            
-                Form1.SendI(Form1.VirtualKeyShort.KEY_X, Form1.ScanCodeShort.KEY_X);
-                xPressed = True;
-            
-            else if (xPressed)
-            
-                Form1.ReleaseKey(Form1.VirtualKeyShort.KEY_X, Form1.ScanCodeShort.KEY_X);
-                xPressed = False;
-            
-            if (output[1] == True && sPressed == False)
-            
-                Form1.SendI(Form1.VirtualKeyShort.KEY_S, Form1.ScanCodeShort.KEY_S);
-                sPressed = True;
-            
-            else if (sPressed)
-            
-                Form1.ReleaseKey(Form1.VirtualKeyShort.KEY_S, Form1.ScanCodeShort.KEY_S);
-                sPressed = False;
-            
-            if (output[2] == True && aPressed == False)
-            
-                Form1.SendI(Form1.VirtualKeyShort.KEY_A, Form1.ScanCodeShort.KEY_A);
-                aPressed = True;
-            
-            else if (aPressed)
-            
-                Form1.ReleaseKey(Form1.VirtualKeyShort.KEY_A, Form1.ScanCodeShort.KEY_A);
-                aPressed = False;
-            
-            if (output[3] == True && zPressed == False)
-            
-                Form1.SendI(Form1.VirtualKeyShort.KEY_Z, Form1.ScanCodeShort.KEY_Z);
-                zPressed = True;
-            
-            else if (zPressed)
-            
-                Form1.ReleaseKey(Form1.VirtualKeyShort.KEY_Z, Form1.ScanCodeShort.KEY_Z);
-                zPressed = False;
-            
-            if (output[4] == True && uPressed == False)
-            
-                Form1.SendI(Form1.VirtualKeyShort.KEY_H, Form1.ScanCodeShort.KEY_H);
-                uPressed = True;
-            
-            else if (output[4] == False && uPressed)
-            
-                Form1.ReleaseKey(Form1.VirtualKeyShort.KEY_H, Form1.ScanCodeShort.KEY_H);
-                uPressed = False;
-            
-            if (output[5] == True && dPressed == False)
-            
-                Form1.SendI(Form1.VirtualKeyShort.KEY_B, Form1.ScanCodeShort.KEY_B);
-                dPressed = True;
-            
-            else if (output[5] == False && dPressed)
-            
-                Form1.ReleaseKey(Form1.VirtualKeyShort.KEY_B, Form1.ScanCodeShort.KEY_B);
-                dPressed = False;
-            
-            if (output[6] == True && lPressed == False)
-            
-                Form1.SendI(Form1.VirtualKeyShort.KEY_V, Form1.ScanCodeShort.KEY_V);
-                lPressed = True;
-            
-            else if (output[6] == False && lPressed)
-            
-                Form1.ReleaseKey(Form1.VirtualKeyShort.KEY_V, Form1.ScanCodeShort.KEY_V);
-                lPressed = False;
-            
-            if (output[7] == True && rPressed == False)
-            
-                Form1.SendI(Form1.VirtualKeyShort.KEY_N, Form1.ScanCodeShort.KEY_N);
-                rPressed = True;
-            
-            else if (output[7] == False && rPressed)
-            
-                Form1.ReleaseKey(Form1.VirtualKeyShort.KEY_N, Form1.ScanCodeShort.KEY_N);
-                rPressed = False;
-            
-        
-        catch (Exception e)
-        
-            continue;
+
+        #get buttons to press
+        output = EvaluateNetwork(genome.network, inputs);
+        if(fitness == 0 and output[7] == False):
+
+            Form1.alive = False;
+
+        str = "";
+        if (output[0] == True):
+
+            str += "x";
+
+        if (output[1] == True):
+
+            str += "s";
+
+        if (output[2] == True):
+
+            str += "a";
+
+        if (output[3] == True):
+
+            str += "z";
+
+        if (output[4] == True):
+
+            str += "u";
+
+        if (output[5] == True):
+
+            str += "d";
+
+        if (output[6] == True):
+
+            str += "l";
+
+        if (output[7] == True):
+
+            str += "r";
+
+        Form1.InputString = str;
+        if (output[0] == True and xPressed == False):
+            keyDown('x')
+            xPressed = True;
+
+        elif (xPressed):
+            keyUp('x')
+            xPressed = False;
+
+        if (output[1] == True and sPressed == False):
+            keyDown('s')
+            sPressed = True;
+
+        elif (sPressed):
+            keyUp('s')
+            sPressed = False;
+
+        if (output[2] == True and aPressed == False):
+            keyDown('a')
+            aPressed = True;
+
+        elif (aPressed):
+            keyUp('a')
+            aPressed = False;
+
+        if (output[3] == True and zPressed == False):
+            keyDown('z')
+            zPressed = True;
+
+        elif (zPressed):
+            keyUp('z')
+            zPressed = False;
+
+        if (output[4] == True and uPressed == False):
+            keyDown('h')
+            uPressed = True;
+
+        elif (output[4] == False and uPressed):
+            keyUp('h')
+            uPressed = False;
+
+        if (output[5] == True and dPressed == False):
+            keyDown('b')
+            dPressed = True;
+
+        elif (output[5] == False and dPressed):
+            keyUp('d')
+            dPressed = False;
+
+        if (output[6] == True and lPressed == False):
+            keyDown('l')
+            lPressed = True;
+
+        elif (output[6] == False and lPressed):
+            keyUp('l')
+            lPressed = False;
+
+        if (output[7] == True and rPressed == False):
+            keyDown('r')
+            rPressed = True;
+
+        elif (output[7] == False and rPressed):
+            keyUp('r')
+            rPressed = False;
         
     
-    if (xPressed)
-    
-        Form1.ReleaseKey(Form1.VirtualKeyShort.KEY_X, Form1.ScanCodeShort.KEY_X);
+    if (xPressed):
+        keyUp('x')
         xPressed = False;
     
-    if (sPressed)
-    
-        Form1.ReleaseKey(Form1.VirtualKeyShort.KEY_S, Form1.ScanCodeShort.KEY_S);
+    if (sPressed):
+        keyUp('s')
         sPressed = False;
     
-    if (aPressed)
-    
-        Form1.ReleaseKey(Form1.VirtualKeyShort.KEY_A, Form1.ScanCodeShort.KEY_A);
+    if (aPressed):
+        keyUp('a')
         aPressed = False;
     
-    if (zPressed)
-    
-        Form1.ReleaseKey(Form1.VirtualKeyShort.KEY_Z, Form1.ScanCodeShort.KEY_Z);
+    if (zPressed):
+        keyUp('z')
         zPressed = False;
     
-    if (uPressed)
-    
-        Form1.ReleaseKey(Form1.VirtualKeyShort.KEY_H, Form1.ScanCodeShort.KEY_H);
+    if (uPressed):
+        keyUp('u')
         uPressed = False;
     
-    if (dPressed)
-    
-        Form1.ReleaseKey(Form1.VirtualKeyShort.KEY_B, Form1.ScanCodeShort.KEY_B);
+    if (dPressed):
+        keyUp('d')
         dPressed = False;
     
-    if (lPressed)
-    
-        Form1.ReleaseKey(Form1.VirtualKeyShort.KEY_V, Form1.ScanCodeShort.KEY_V);
+    if (lPressed):
+        keyUp('l')
         lPressed = False;
     
-    if (rPressed)
-    
-        Form1.ReleaseKey(Form1.VirtualKeyShort.KEY_N, Form1.ScanCodeShort.KEY_N);
+    if (rPressed):
+        keyUp('r')
         rPressed = False;
     
 
     fitness = Form1.marioX;
-    if (fitness <= 0)
+    if (fitness <= 0):
     
         fitness = -1;
     
     print("Fitness:" + fitness);
     genome.fitness = fitness;
-    if (genome.fitness > pool.maxFitness)
+    if (genome.fitness > pool.maxFitness):
     
         pool.maxFitness = genome.fitness;
     
 
 
 #cycle through all the genomes
-NextGenome()
-
+def NextGenome():
+    global ThreadCount
     pool.current= pool.current+ 1;
-    if (pool.current>= pool.species[pool.currentSpecies].genomes.Count)
+    if (pool.current>= len(pool.species[pool.currentSpecies].genomes)):
     
         pool.current= 0;
         pool.current= pool.current+ 1;
-        if (pool.current>= pool.species.Count)
+        if (pool.current>= len(pool.species.Count)):
         
             ThreadCount = 0;
             NewGeneration();
-            pool.best = null;
+            pool.best = None;
             pool.maxFitness = 0;
             pool.current= 0;
         
@@ -1043,8 +1016,8 @@ NextGenome()
 
 
 #check if a genome's fitness has already been measured
-FitnessAlreadyMeasured()
-
+def FitnessAlreadyMeasured():
+    global pool
     species = pool.species[pool.currentSpecies];
     genome = species.genomes[pool.currentGenome];
 
@@ -1052,13 +1025,13 @@ FitnessAlreadyMeasured()
 
 
 #main training loop
-Run()
-
+def Run():
+    global pool
     InitializePool();   
-    while (True)
+    while (True):
     
         #cycle through genomes until unmeasured one is found
-        while (FitnessAlreadyMeasured())
+        while (FitnessAlreadyMeasured()):
         
             NextGenome();
         
@@ -1066,7 +1039,7 @@ Run()
         species = pool.species[pool.currentSpecies];
         genome = species.genomes[pool.currentGenome];
         #evaluate
-        int[] tt = int[]  pool.currentSpecies, pool.current;
+        tt = [pool.currentSpecies, pool.current];
         EvaluateCurrent(tt);
 
     
