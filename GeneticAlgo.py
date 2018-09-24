@@ -1,11 +1,13 @@
 import math
 import random
+from Classes import *
+
 Inputs = 10; #169 inputs and 1 bias
 Outputs = 9; #8 controller keys
 MaxNodes = 1000000;
 
 Population = 300;
-StaleSpecies = 15;
+Stale= 15;
 
 DeltaDisjo= 2.0;
 DeltaWeights = 0.4;
@@ -57,7 +59,7 @@ def NewPool():
 #create a species
 def NewSpecies():
 
-    Species species = Species();
+    species = Species();
     species.topFitness = 0;
     species.staleness = 0;
     species.genomes = List<Genome>();
@@ -66,50 +68,49 @@ def NewSpecies():
 
 
 #create a genome
-Genome NewGenome()
+def NewGenome():
 
-    Genome genome = Genome(MutateConnectionsChance, LinkMutationChance, BiasMutationChance, NodeMutationChance, EnableMutationChance, DisableMutationChance, StepSize);
+    genome = Genome(MutateConnectionsChance, LinkMutationChance, BiasMutationChance, NodeMutationChance, EnableMutationChance, DisableMutationChance, StepSize);
     return genome;
 
 
 #return a complete copy of a genome, no references attached
-Genome CopyGenome(Genome genome)
+def CopyGenome(genome):
 
-    Genome genome2 = NewGenome();
+    genome2 = NewGenome();
 
-    for (g = 0; g < genome.genes.Count; g++)
-    
-        genome2.genes.Add(CopyGene(genome.genes[g]));
+    for g in range(len(genome.genes)):    
+        genome2.genes.append(CopyGene(genome.genes[g]));
 
     
     genome2.maxneuron = genome.maxneuron;
-    genome2.mutationRates.Rows[0]["connections"] = genome.mutationRates.Rows[0]["connections"];
+    genome2.mutationRates["connections"] = genome.mutationRates["connections"];
 
-    genome2.mutationRates.Rows[0]["link"] = genome.mutationRates.Rows[0]["link"];
+    genome2.mutationRates["link"] = genome.mutationRates["link"];
 
-    genome2.mutationRates.Rows[0]["bias"] = genome.mutationRates.Rows[0]["bias"];
+    genome2.mutationRates["bias"] = genome.mutationRates["bias"];
 
-    genome2.mutationRates.Rows[0]["node"] = genome.mutationRates.Rows[0]["node"];
+    genome2.mutationRates["node"] = genome.mutationRates["node"];
 
-    genome2.mutationRates.Rows[0]["enable"] = genome.mutationRates.Rows[0]["enable"];
+    genome2.mutationRates["enable"] = genome.mutationRates["enable"];
 
-    genome2.mutationRates.Rows[0]["disable"] = genome.mutationRates.Rows[0]["disable"];
+    genome2.mutationRates["disable"] = genome.mutationRates["disable"];
 
 
     return genome2;
 
 
 #returns a randomly mutated genome
-Genome BasicGenome()
+def BasicGenome():
 
-    Genome genome = NewGenome();
+    genome = NewGenome();
     genome.maxneuron = Inputs;
     Mutate(genome);
     return genome;
 
 
 #creates a gene
-NewGene()
+def NewGene():
 
 
     gene = Gene();
@@ -117,7 +118,7 @@ NewGene()
 
 
 #returns a copy of a gene
-CopyGene(gene)
+def CopyGene(gene):
 
 
     gene2 = NewGene();
@@ -132,43 +133,38 @@ CopyGene(gene)
 
 
 #creates a neuron(equivalent to a node in the genome structure)
-Neuron NewNeuron()
+def NewNeuron():
 
-    Neuron neuron = Neuron();
+    neuron = Neuron();
     return neuron;
 
 
 #creates a neural network based off a genome's connections and neurons
-GenerateNetwork(Genome genome)
+def GenerateNetwork(genome):
 
-    NeuralNet network = NeuralNet();
+    network = NeuralNet();
     network.neurons = List<Neuron>(Neuron[MaxNodes + Outputs]);
-    for (i = 0; i < MaxNodes + Outputs; i++)
-    
-        network.neurons[i] = null;
-    
-    for (i = 0; i < Inputs; i++)
-    
+    for i in range(MaxNodes + Outputs):
+        network.neurons[i] = None;
+
+    for i in range(Inputs):
         network.neurons[i] = NewNeuron();
-    
-    for (o = 0; o < Outputs; o++)
-    
+
+    for o in range(Outputs):
         network.neurons[MaxNodes + o] = NewNeuron();
     
-
-    genome.genes = genome.genes.OrderBy(x => x.outo).ToList();
-    for (i = 0; i < genome.genes.Count; i++)
-    
+    genome.genes = sorted(genome.genes, lambda x: x.outo)
+    for i in range(len(genome.genes)):
         gene = genome.genes[i];
-        if (gene.enabled)
+        if (gene.enabled):
         
-            if (network.neurons[gene.outo] == null)
+            if (network.neurons[gene.outo] == None):
             
                 network.neurons[gene.outo] = NewNeuron();
             
-            Neuron neuron = network.neurons[gene.outo];
-            neuron.incoming.Add(gene);
-            if (network.neurons[gene.into] == null)
+            neuron = network.neurons[gene.outo];
+            neuron.incoming.append(gene);
+            if (network.neurons[gene.into] == None):
             
                 network.neurons[gene.into] = NewNeuron();
             
@@ -178,98 +174,89 @@ GenerateNetwork(Genome genome)
 
 
 #returns a list of output controls based off an input list for a network
-List<bool> EvaluateNetwork(NeuralNet network, List<double> inputs)
+def EvaluateNetwork(network, inputs):
 
-    inputs.Add(1);
-    if (inputs.Count != Inputs)
+    inputs.append(1);
+    if (len(inputs) != Inputs):
     
-        Console.WriteLine("Incorrect number of neural network inputs.");
-        return List<bool>();
-    
-    for (i = 0; i < Inputs; i++)
-    
+        print("Incorrect number of neural network inputs.");
+        return [];
+
+    for i in range(Inputs):
         network.neurons[i].value = inputs[i];
-    
-    foreach (Neuron neuron in network.neurons)
-    
-        if (neuron == null)
-        
+
+    for neuron in network.neurons:
+        if (neuron == None):
             continue;
         
         sum = 0;
-        for (j = 0; j < neuron.incoming.Count; j++)
-        
+        for j in range(len(neuron.incoming)):
             incoming = neuron.incoming[j];
-            Neuron other = network.neurons[incoming.into];
+            other = network.neurons[incoming.into];
             sum += (incoming.weight * other.value);
-        
-        if (neuron.incoming.Count > 0)
+
+        if (neuron.incoming.Count > 0):
         
             neuron.value = Sigmoid(sum);
         
     
-    List<bool> outputs = List<bool>();
-    for (o = 0; o < Outputs; o++)
-    
-        if (network.neurons[MaxNodes + o].value > 0)
+    outputs = List<bool>();
+    for o in range(Outputs):
+
+        if (network.neurons[MaxNodes + o].value > 0):
         
-            outputs.Add(True);
+            outputs.append(True);
         
-        else
+        else:
         
-            outputs.Add(False);
+            outputs.append(False);
         
     
     return outputs;
 
 
 #returns a list of output controls based off an input list for a network
-List<double> EvaluateNetworkDouble(NeuralNet network, List<double> inputs, side)
+def EvaluateNetworkDouble(network, inputs, side):
 
-    inputs.Add(side);
-    if (inputs.Count != Inputs)
+    inputs.append(side);
+    if (len(inputs) != Inputs):
     
-        Console.WriteLine("Incorrect number of neural network inputs.");
-        return List<double>();
-    
-    for (i = 0; i < Inputs; i++)
-    
+        print("Incorrect number of neural network inputs.");
+        return [];
+
+    for i in range(Inputs):
         network.neurons[i].value = inputs[i];
-    
-    foreach (Neuron neuron in network.neurons)
-    
-        if (neuron == null)
-        
+
+    for neuron in network.neurons:
+        if (neuron == None):
             continue;
         
         sum = 0;
-        for (j = 0; j < neuron.incoming.Count; j++)
-        
+        for j in range(len(neuron.incoming)):
+
             incoming = neuron.incoming[j];
-            Neuron other = network.neurons[incoming.into];
+            other = network.neurons[incoming.into];
             sum += (incoming.weight * other.value);
         
-        if (neuron.incoming.Count > 0)
+        if (neuron.incoming.Count > 0):
         
             neuron.value = Sigmoid(sum);
         
     
-    List<double> outputs = List<double>();
-    for (o = 0; o < Outputs; o++)
-    
-        outputs.Add(network.neurons[MaxNodes + o].value);
+    outputs = []
+    for o in range(Outputs):
+
+        outputs.append(network.neurons[MaxNodes + o].value);
     
     return outputs;
 
 
 #returns the highest index of a genome's connections
-GetHighestInnovation(Genome g)
+def GetHighestInnovation(g):
 
     highest = 0;
-    for (i = 0; i < g.genes.Count; i++)
-    
-        if (g.genes[i].innovation > highest)
-        
+    for i in range(len(g.genes)):
+        if (g.genes[i].innovation > highest):
             highest = g.genes[i].innovation;
 
         
@@ -278,112 +265,92 @@ GetHighestInnovation(Genome g)
 
 
 #creates child from excess/disjogenes of highest fitness genome and matching genes of random genome
-Genome Crossover(Genome ge1, Genome ge2)
+def Crossover(ge1, ge2):
 
-    Genome g1;
-    Genome g2;
-    if (ge2.fitness > ge1.fitness)
-    
+    g1 = None;
+    g2 = None;
+    if (ge2.fitness > ge1.fitness):
         g1 = ge2;
         g2 = ge1;
     
-    else
-    
+    else:
         g1 = ge1;
         g2 = ge2;
     
-    Genome child = NewGenome();
-    List<Gene> innovations2 = List<Gene>();
+    child = NewGenome();
+    innovations2 = []
 
-    for (i = 0; i < pool.innovation + 1; i++)
-    
-        innovations2.Add(null);
-    
-    for (i = 0; i < g2.genes.Count; i++)
-    
+    for i in range(pool.innovation + 1):
+
+        innovations2.append(None);
+
+    for i in range(len(g2.genes)):
+
         gene = g2.genes[i];
         innovations2[gene.innovation] = gene;
     
 
-    for (i = 0; i < g1.genes.Count; i++)
-    
+    for i in range(len(g1.genes)):
         gene1 = g1.genes[i];
         gene2 = innovations2[gene1.innovation];
-        if (gene2 != null && r.Next(1, 3) == 1 && gene2.enabled)
-        
-            child.genes.Add(CopyGene(gene2));
-        
-        else
-        
-            child.genes.Add(CopyGene(gene1));
+        if (gene2 != None and random.randint(1, 3) == 1 and gene2.enabled):
+            child.genes.append(CopyGene(gene2));
+        else:
+            child.genes.append(CopyGene(gene1));
         
     
-    child.maxneuron = math.Max(g1.maxneuron, g2.maxneuron);
-    for (i = 0; i < g1.mutationRates.Columns.Count; i++)
-    
-        child.mutationRates.Rows[0][child.mutationRates.Columns[i]] = g1.mutationRates.Rows[0][g1.mutationRates.Columns[i]];
-    
+    child.maxneuron = math.max(g1.maxneuron, g2.maxneuron);
+    child.mutationRates = g1.mutationRates.copy()
+
     return child;
 
 
 #get index of a random neuron in a genome
-RandomNeuron(List<Gene> genes, nonInput)
+def RandomNeuron(genes, nonInput):
 
-    bool[] neurons = bool[MaxNodes + Outputs];
-    if (nonInput == False)
-    
-        for (i = 0; i < Inputs; i++)
-        
+    neurons = bool[MaxNodes + Outputs];
+    if (nonInput == False):
+        for i in range(Inputs):
             neurons[i] = True;
         
-    
-    for (i = 0; i < Outputs; i++)
-    
+    for i in range(Outputs):
         neurons[MaxNodes + i] = True;
-    
-    for (i = 0; i < genes.Count; i++)
-    
-        if (nonInput == False || genes[i].into >= Inputs)
+
+    for i in range(len(genes)):
+
+        if (nonInput == False or genes[i].into >= Inputs):
         
             neurons[genes[i].into] = True;
         
-        if (nonInput == False || genes[i].outo >= Inputs)
+        if (nonInput == False or genes[i].outo >= Inputs):
         
             neurons[genes[i].outo] = True;
         
     
     count = 0;
-    foreach (b in neurons)
-    
-        if (b)
-        
-            count++;
+    for b in neurons:
+        if (b):
+            count+= 1
         
     
 
-    n = r.Next(0, count + 1);
-    for (i = 0; i < neurons.Length; i++)
-    
-        if (neurons[i])
+    n = random.randint(0, count + 1);
+    for i in range(len(neurons)):
+        if (neurons[i]):
         
-            n--;
-            if (n == 0)
-            
+            n-= 1
+            if (n == 0):
                 return i;
-            
-        
-    
 
     return 0;
 
 
 #checks if a particular gene already exists in a gene set
-ContainsLink(List<Gene> genes, link)
+def ContainsLink(genes, link):
 
-    for (i = 0; i < genes.Count; i++)
-    
+    for i in range(len(genes)):
         gene = genes[i];
-        if (gene.into == link.into && gene.outo == link.outo)
+        if (gene.into == link.into and gene.outo == link.outo):
         
             return True;
         
@@ -392,51 +359,51 @@ ContainsLink(List<Gene> genes, link)
 
 
 #either slightly perturb or randomly replace each gene in a genome
-PointMutate(Genome genome)
+def PointMutate(genome):
 
-    step = Convert.ToDouble(genome.mutationRates.Rows[0]["step"]);
-    for (i = 0; i < genome.genes.Count; i++)
-    
+
+    step = genome.mutationRates["step"]
+    for i in range(len(genome.genes)):
         gene = genome.genes[i];
-        if (r.NextDouble() < PerturbChance)
+        if (random.random() < PerturbChance):
         
-            gene.weight = gene.weight + r.NextDouble() * (step * 2 - step);
+            gene.weight = gene.weight + random.random() * (step * 2 - step);
         
-        else
+        else:
         
-            gene.weight = r.NextDouble() * 4 - 2;
+            gene.weight = random.random() * 4 - 2;
         
     
 
 
 #create a link between unconnected neurons
-LinkMutate(Genome genome, forceBias)
+def LinkMutate(genome, forceBias):
 
     newLink = NewGene();
-    n1;
-    n2;
+    n1 = None;
+    n2 = None;
     #find two neurons in genome
-    while (True)
+    while (True):
     
         n1 = RandomNeuron(genome.genes, False);
         n2 = RandomNeuron(genome.genes, True);
         #make sure not both inputs
-        if (n1 < Inputs && n2 < Inputs)
+        if (n1 < Inputs and n2 < Inputs):
         
             continue;
         
         break;
     
 
-    neuron1;
-    neuron2;
+    neuron1 = None
+    neuron2 = None
     #verify neuron1 is the input
-    if (n2 < Inputs)
+    if (n2 < Inputs):
     
         neuron1 = n2;
         neuron2 = n1;
     
-    else
+    else:
     
         neuron1 = n1;
         neuron2 = n2;
@@ -444,31 +411,31 @@ LinkMutate(Genome genome, forceBias)
     newLink.into = neuron1;
     newLink.outo = neuron2;
     #if you want to modify the bias connection
-    if (forceBias)
+    if (forceBias):
     
         newLink.into = Inputs - 1;
     
     #make sure link doesnt exist
-    if (ContainsLink(genome.genes, newLink))
+    if (ContainsLink(genome.genes, newLink)):
     
         return;
     
     newLink.innovation = NewInnovation();
-    newLink.weight = r.NextDouble() * 4 - 2;
+    newLink.weight = random.random() * 4 - 2;
     genome.genes.Add(newLink);
 
 
 #create a neuron by splitting a link into two parts
-NodeMutate(Genome genome)
+def NodeMutate(genome):
 
-    if (genome.genes.Count == 0)
+    if (genome.genes.Count == 0):
     
         return;
     
     genome.maxneuron = genome.maxneuron + 1;
-    gene = genome.genes[r.Next(0, genome.genes.Count)];
+    gene = genome.genes[random.randint(0, genome.genes.Count)];
     #cancel if gene isnt enabled
-    if (gene.enabled == False)
+    if (gene.enabled == False):
     
         return;
     
@@ -479,93 +446,91 @@ NodeMutate(Genome genome)
     gene1.weight = 1;
     gene1.innovation = NewInnovation();
     gene1.enabled = True;
-    genome.genes.Add(gene1);
+    genome.genes.append(gene1);
     gene2 = CopyGene(gene);
     gene2.into = genome.maxneuron;
     gene2.innovation = NewInnovation();
     gene2.enabled = True;
-    genome.genes.Add(gene2);
+    genome.genes.append(gene2);
 
 
 #randomly choose a gene to be enabled/disabled
-EnableDisableMutate(Genome genome, enable)
+def EnableDisableMutate(genome, enable):
 
-    List<Gene> candidates = List<Gene>();
-    for (i = 0; i < genome.genes.Count; i++)
-    
-        if (genome.genes[i].enabled != enable)
+    candidates = []
+    for i in range(len(genome.genes)):
+        if (genome.genes[i].enabled != enable):
         
-            candidates.Add(genome.genes[i]);
+            candidates.append(genome.genes[i]);
         
     
-    if (candidates.Count == 0)
+    if (candidates.Count == 0):
     
         return;
     
-    gene = candidates[r.Next(0, candidates.Count)];
-    gene.enabled = !gene.enabled;
+    gene = candidates[random.randint(0, candidates.Count)];
+    gene.enabled = not gene.enabled;
 
 
 #run all mutations on a genome
-Mutate(Genome genome)
+def Mutate(genome):
 
     #alter genome's internal mutation rates
-    for (i = 0; i < genome.mutationRates.Columns.Count; i++)
+    for i in range(len(genome.mutationRates)):
+        if (random.randint(0, 2) == 0):
+        
+            genome.mutationRates[i] = .95 * genome.mutationRates[i]
+        
+        else:
+        
+            genome.mutationRates[i] = 1.05263 * genome.mutationRates[i]
+        
     
-        if (r.Next(0, 2) == 0)
-        
-            genome.mutationRates.Rows[0][genome.mutationRates.Columns[i]] = .95 * Convert.ToDouble(genome.mutationRates.Rows[0][genome.mutationRates.Columns[i]]);
-        
-        else
-        
-            genome.mutationRates.Rows[0][genome.mutationRates.Columns[i]] = 1.05263 * Convert.ToDouble(genome.mutationRates.Rows[0][genome.mutationRates.Columns[i]]);
-        
-    
-    if (r.NextDouble() < Convert.ToDouble(genome.mutationRates.Rows[0]["connections"]))
+    if (random.random() < genome.mutationRates["connections"]):
     
         PointMutate(genome);
     
-    p = Convert.ToDouble(genome.mutationRates.Rows[0]["link"]);
-    while (p > 0)
+    p = genome.mutationRates["link"]
+    while (p > 0):
     
-        if (r.NextDouble() < p)
+        if (random.random() < p):
         
             LinkMutate(genome, False);
         
         p = p - 1;
 
     
-    p = Convert.ToDouble(genome.mutationRates.Rows[0]["bias"]);
-    while (p > 0)
+    p = genome.mutationRates["bias"]
+    while (p > 0):
     
-        if (r.NextDouble() < p)
+        if (random.random() < p):
         
             LinkMutate(genome, True);
         
         p = p - 1;
     
-    p = Convert.ToDouble(genome.mutationRates.Rows[0]["node"]);
-    while (p > 0)
+    p = genome.mutationRates["node"]
+    while (p > 0):
     
-        if (r.NextDouble() < p)
+        if (random.random() < p)
         
             NodeMutate(genome);
         
         p = p - 1;
     
-    p = Convert.ToDouble(genome.mutationRates.Rows[0]["enable"]);
-    while (p > 0)
+    p = genome.mutationRates["enable"]
+    while (p > 0):
     
-        if (r.NextDouble() < p)
+        if (random.random() < p):
         
             EnableDisableMutate(genome, True);
         
         p = p - 1;
     
-    p = Convert.ToDouble(genome.mutationRates.Rows[0]["disable"]);
-    while (p > 0)
+    p = genome.mutationRates["disable"]
+    while (p > 0):
     
-        if (r.NextDouble() < p)
+        if (random.random() < p):
         
             EnableDisableMutate(genome, False);
         
@@ -574,39 +539,34 @@ Mutate(Genome genome)
 
 
 #disjopart of species distance equation
-Disjoint(List<Gene> genes1, List<Gene> genes2)
+def Disjoint(genes1, genes2):
 
-    bool[] i1 = bool[pool.innovation + 100];
-    for (i = 0; i < genes1.Count; i++)
-    
+    i1 = [] * (pool.innovation + 100);
+    for i in range(len(genes1)):
         gene = genes1[i];
         i1[gene.innovation] = True;
     
-    bool[] i2 = bool[pool.innovation + 100];
-    for (i = 0; i < genes2.Count; i++)
-    
+    i2 = [] * (pool.innovation + 100)
+    for i in range(len(genes2)):
         gene = genes2[i];
         i2[gene.innovation] = True;
     
     disjointGenes = 0;
-    for (i = 0; i < genes1.Count; i++)
-    
+    for i in range(len(genes1)):
         gene = genes1[i];
-        if (i2[gene.innovation] == False)
+        if (i2[gene.innovation] == False):
         
             disjointGenes = disjointGenes + 1;
         
-    
-    for (i = 0; i < genes2.Count; i++)
-    
+    for i in range(len(genes2)):
         gene = genes2[i];
-        if (i1[gene.innovation] == False)
+        if (i1[gene.innovation] == False):
         
             disjointGenes = disjointGenes + 1;
         
     
-    n = math.Max(genes1.Count, genes2.Count);
-    if (n == 0)
+    n = math.max(len(genes1), len(genes2));
+    if (n == 0):
     
         n = 1;
     
@@ -614,20 +574,18 @@ Disjoint(List<Gene> genes1, List<Gene> genes2)
 
 
 #weight part of species distance equation
-Weights(List<Gene> genes1, List<Gene> genes2)
+def Weights(genes1, genes2):
 
-    Gene[] i2 = Gene[pool.innovation + 100];
-    for (i = 0; i < genes2.Count; i++)
-    
+    i2 = Gene[pool.innovation + 100];
+    for i in range(len(genes2)):
         gene = genes2[i];
         i2[gene.innovation] = gene;
     
     sum = 0;
     coincident = 0;
-    for (i = 0; i < genes1.Count; i++)
-    
+    for i in range(len(genes1)):
         gene = genes1[i];
-        if (i2[gene.innovation] != null)
+        if i2[gene.innovation] != None:
         
             gene2 = i2[gene.innovation];
             sum = sum + math.Abs(gene.weight - gene2.weight);
@@ -638,7 +596,7 @@ Weights(List<Gene> genes1, List<Gene> genes2)
 
 
 #check if two genomes are part of the same species
-SameSpecies(Genome genome1, Genome genome2)
+def SameSpecies(genome1, genome2):
 
     dd = DeltaDisjo* Disjoint(genome1.genes, genome2.genes);
     dw = DeltaWeights * Weights(genome1.genes, genome2.genes);
@@ -646,80 +604,72 @@ SameSpecies(Genome genome1, Genome genome2)
 
 
 #assign a global rank to each genome, from lowest fitness to highest
-RankGlobally()
+def RankGlobally():
 
-    List<Genome> global = List<Genome>();
-    for (s = 0; s < pool.species.Count; s++)
-    
-        Species species = pool.species[s];
-        for (g = 0; g < species.genomes.Count; g++)
+    globalList = []
+    for s in range(len(pool.species)):
+        species = pool.species[s];
+        for g in range(len(species.genomes)):
+
+            globalList.append(species.genomes[g]);
         
-            global.Add(species.genomes[g]);
-        
-    
-    global = global.OrderBy(x => x.fitness).ToList();
-    for (g = 0; g < global.Count; g++)
-    
-        global[g].globalRank = g + 1;
+    globalList = sorted(globalList, lambda x : x.fitness)
+    for g in range(len(globalList)):
+
+        globalList[g].globalRank = g + 1;
     
 
 
 #calculate the average rank of a species's genomes
-CalculateAverageFitness(Species species)
+def CalculateAverageFitness(species):
 
     total = 0;
-    for (g = 0; g < species.genomes.Count; g++)
-    
-        Genome genome = species.genomes[g];
+    for g in range(len(species.genomes)):
+        genome = species.genomes[g];
         total = total + genome.globalRank;
     
     species.averageFitness = total / species.genomes.Count;
 
 
 #calculate the total of all average fitnesses
-TotalAverageFitness()
+def TotalAverageFitness():
 
     total = 0;
-    for (s = 0; s < pool.species.Count; s++)
-    
-        Species species = pool.species[s];
+    for s in range(len(pool.species)):
+        species = pool.species[s];
         total = total + species.averageFitness;
     
     return total;
 
 
 #remove a certain amount of genomes in every species
-CullSpecies(cutToOne)
+def CullSpecies(cutToOne):
 
-    for (s = 0; s < pool.species.Count; s++)
-    
-        Species species = pool.species[s];
-        species.genomes = species.genomes.OrderByDescending(x => x.fitness).ToList();
-        remaining = (int)math.Ceiling((double)species.genomes.Count / (double)2);
-        if (cutToOne)
-        
+    for s in range(len(pool.species)):
+        species = pool.species[s];
+        species.genomes = sorted(species.genomes, lambda x: x.fitness, reverse=True)
+        remaining = math.ceil(len(species.genomes) / 2.0);
+        if (cutToOne):
             remaining = 1;
         
-        while (species.genomes.Count > remaining)
-        
-            species.genomes.RemoveAt(species.genomes.Count - 1);
-        
+        while (len(species.genomes) > remaining):
+            species.genomes.pop(len(species.genomes) - 1)
     
 
 
 #create a genome from a species
-Genome BreedChild(Species species)
+def BreedChild(species):
 
-    Genome child;
-    if (r.NextDouble() < CrossoverChance)
+    child = None
+    if (random.random() < CrossoverChance):
     
-        Genome g1 = species.genomes[r.Next(0, species.genomes.Count)];
-        Genome g2 = species.genomes[r.Next(0, species.genomes.Count)];
+        g1 = species.genomes[random.randint(0, species.genomes.Count)];
+        g2 = species.genomes[random.randint(0, species.genomes.Count)];
         child = Crossover(g1, g2);
     
-    else
+    else:
     
-        Genome g = species.genomes[r.Next(0, species.genomes.Count)];
+        g = species.genomes[random.randint(0, species.genomes.Count)];
         child = CopyGenome(g);
     
     Mutate(child);
@@ -727,119 +677,113 @@ Genome BreedChild(Species species)
 
 
 #remove species that havent been the best lately
-RemoveStaleSpecies()
+def RemoveStaleSpecies():
 
-    List<Species> survived = List<Species>();
-    for (s = 0; s < pool.species.Count; s++)
-    
-        Species species = pool.species[s];
-        species.genomes = species.genomes.OrderByDescending(x => x.fitness).ToList();
-        if (species.genomes[0].fitness > species.topFitness)
+    survived = []
+    for s in range(len(pool.species)):
+        species = pool.species[s];
+        species.genomes = sorted(species.genomes, lambda x: x.fitness, reverse=True)
+        if (species.genomes[0].fitness > species.topFitness):
         
             species.topFitness = species.genomes[0].fitness;
             species.staleness = 0;
-        
-        else
+
+        else:
         
             species.staleness = species.staleness + 1;
         
-        if (species.staleness < StaleSpecies || species.topFitness >= pool.maxFitness)
+        if (species.staleness < Stale|| species.topFitness >= pool.maxFitness):
         
-            survived.Add(species);
+            survived.append(species);
         
     
     pool.species = survived;
 
 
 #remove species that are terrible in global ranking 
-RemoveWeakSpecies()
-
-    List<Species> survived = List<Species>();
-    sum = TotalAverageFitness();
-    for (s = 0; s < pool.species.Count; s++)
-    
-        Species species = pool.species[s];
-        breed = math.Floor(species.averageFitness / sum * Population);
-        if (breed >= 1)
+def RemoveWeakSpecies():
+    global pool
+    survived = []
+    sum = TotalAverageFitness()
+    for s in range(len(pool.species)):
+        species = pool.species[s];
+        breed = math.floor(species.averageFitness / sum * Population);
+        if (breed >= 1):
         
-            survived.Add(species);
+            survived.append(species);
         
     
     pool.species = survived;
 
 
 #determine a species to add a genome to
-AddToSpecies(Genome child)
-
-    foundSpecies = False;
-    for (s = 0; s < pool.species.Count; s++)
-    
-        Species species = pool.species[s];
-        if (foundSpecies == False && SameSpecies(child, species.genomes[0]))
+def AddToSpecies(child):
+    global pool
+    found= False;
+    for s in range(len(pool.species)):
+        species = pool.species[s];
+        if (found== False and SameSpecies(child, species.genomes[0])):
         
             species.genomes.Add(child);
-            foundSpecies = True;
+            found= True;
         
     
-    if (foundSpecies == False)
+    if (found== False):
     
-        Species childSpecies = NewSpecies();
-        childSpecies.genomes.Add(child);
-        pool.species.Add(childSpecies);
+        childSpecies = NewSpecies();
+        childSpecies.genomes.append(child);
+        pool.species.append((childSpecies);
     
 
 
 #create a generation of genomes
-NewGeneration()
-
+def NewGeneration():
+    global pool
     #cuts each species's population in half
     CullSpecies(False);
     RankGlobally();
     RemoveStaleSpecies();
     RankGlobally();
-    for (s = 0; s < pool.species.Count; s++)
-    
-        Species species = pool.species[s];
+    for s in range(len(pool.species)):
+        species = pool.species[s];
         CalculateAverageFitness(species);
     
     RemoveWeakSpecies();
     sum = TotalAverageFitness();
     #breed the species a certain amount of times proportional to their worth
-    List<Genome> children = List<Genome>();
-    for (s = 0; s < pool.species.Count; s++)
+    children = []
+    for s in range(len(pool.species)):
     
-        Species species = pool.species[s];
+        species = pool.species[s];
         breed = math.Floor(species.averageFitness / sum * Population) - 1;
-        for (i = 0; i < breed; i++)
-        
-            children.Add(BreedChild(species));
+        for i in range(breed):
+
+            children.append(BreedChild(species));
         
     
     #eliminate all but the best members of each species
     CullSpecies(True);
     #breed the top members until population is full again
-    while (children.Count + pool.species.Count < Population)
+    while (len(childreN) + len(pool.species) < Population):
     
-        Species species = pool.species[r.Next(0, pool.species.Count)];
-        children.Add(BreedChild(species));
+        species = pool.species[random.randint(0, len(pool.species))];
+        children.append(BreedChild(species));
     
     #add all the children to the species
-    for (c = 0; c < children.Count; c++)
-    
-        Genome child = children[c];
+    for c in range(len(children)):
+        child = children[c];
         AddToSpecies(child);
     
-    pool.generation = pool.generation + 1;
+    pool.generation = pool.generation + 1
 
 
 
 #create and fill a pool with random genomes
-InitializePool()
-
+def InitializePool():
+    global pool
     pool = NewPool();
-    for (i = 0; i < Population; i++)
-    
-        Genome basic = BasicGenome();
+    for i in range(Population):)
+        basic = BasicGenome();
         AddToSpecies(basic);
     
     InitializeRun();
@@ -848,8 +792,8 @@ InitializePool()
 #generate a network for the current genome
 InitializeRun()
 
-    Species species = pool.species[pool.currentSpecies];
-    Genome genome = species.genomes[pool.currentGenome];
+    species = pool.species[pool.currentSpecies];
+    genome = species.genomes[pool.currentGenome];
     GenerateNetwork(genome);
 
 #evaluate the fitness of the current genome
@@ -859,19 +803,19 @@ EvaluateCurrent(object d)
     sp = (int)data[0];
     g = (int)data[1];
     EvaluateMario();
-    Console.WriteLine("Evaluated");
+    print("Evaluated");
     ThreadCount++;
 
 
 #determine the fitness of the current genome for mario
 EvaluateMario()
 
-    Species species = pool.species[pool.currentSpecies];
-    Genome genome = species.genomes[pool.currentGenome];
+    species = pool.species[pool.currentSpecies];
+    genome = species.genomes[pool.currentGenome];
     GenerateNetwork(genome);
 
     #gui controls
-    Form1.BestGenome = pool.currentGenome;
+    Form1.Best= pool.currentGenome;
     Form1.BestFitness = pool.maxFitness;
     Form1.SpeciesCount = pool.currentSpecies;
     Form1.SpeciesTot = pool.species.Count;
@@ -889,7 +833,7 @@ EvaluateMario()
         
             Form1.ActivateApp("EmuHawk");
             int[][] inputt = int[Form1.inputs.Length][];
-            List<double> inputs = List<double>();
+            inputs = List<double>();
             Array.Copy(Form1.inputs, inputt, Form1.inputs.Length);
             for (i = 0; i < inputt.Length; i++)
             
@@ -899,7 +843,7 @@ EvaluateMario()
                 
             
             #get buttons to press
-            List<bool> output = EvaluateNetwork(genome.network, inputs);
+            output = EvaluateNetwork(genome.network, inputs);
             if(fitness == 0 && output[7] == False)
             
                 Form1.alive = False;
@@ -1071,7 +1015,7 @@ EvaluateMario()
     
         fitness = -1;
     
-    Console.WriteLine("Fitness:" + fitness);
+    print("Fitness:" + fitness);
     genome.fitness = fitness;
     if (genome.fitness > pool.maxFitness)
     
@@ -1082,18 +1026,18 @@ EvaluateMario()
 #cycle through all the genomes
 NextGenome()
 
-    pool.currentGenome = pool.currentGenome + 1;
-    if (pool.currentGenome >= pool.species[pool.currentSpecies].genomes.Count)
+    pool.current= pool.current+ 1;
+    if (pool.current>= pool.species[pool.currentSpecies].genomes.Count)
     
-        pool.currentGenome = 0;
-        pool.currentSpecies = pool.currentSpecies + 1;
-        if (pool.currentSpecies >= pool.species.Count)
+        pool.current= 0;
+        pool.current= pool.current+ 1;
+        if (pool.current>= pool.species.Count)
         
             ThreadCount = 0;
             NewGeneration();
             pool.best = null;
             pool.maxFitness = 0;
-            pool.currentSpecies = 0;
+            pool.current= 0;
         
     
 
@@ -1101,8 +1045,8 @@ NextGenome()
 #check if a genome's fitness has already been measured
 FitnessAlreadyMeasured()
 
-    Species species = pool.species[pool.currentSpecies];
-    Genome genome = species.genomes[pool.currentGenome];
+    species = pool.species[pool.currentSpecies];
+    genome = species.genomes[pool.currentGenome];
 
     return (genome.fitness != 0);
 
@@ -1119,10 +1063,10 @@ Run()
             NextGenome();
         
         #select genome and species
-        Species species = pool.species[pool.currentSpecies];
-        Genome genome = species.genomes[pool.currentGenome];
+        species = pool.species[pool.currentSpecies];
+        genome = species.genomes[pool.currentGenome];
         #evaluate
-        int[] tt = int[]  pool.currentSpecies, pool.currentGenome ;
+        int[] tt = int[]  pool.currentSpecies, pool.current;
         EvaluateCurrent(tt);
 
     

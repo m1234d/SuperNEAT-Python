@@ -9,6 +9,7 @@ class Pool:
         self.currentFrame = currentFr;
         self.maxFitness = maxFit;
 
+
 class Species:
     def __init__(self):
         self.genomes = []
@@ -18,7 +19,6 @@ class Species:
 
 
 class Genome:
-
     def __init__(self, conChance, linkChance, biasChance, nodeChance, enableChance, disableChance, stepSize):
         self.genes = []
         self.fitness = 0.0;
@@ -35,6 +35,7 @@ class Genome:
         self.mutationRates["disable"] = disableChance;
         self.mutationRates["step"] = stepSize;
 
+
 class Gene:
     def __init__(self):
         self.into = 0;
@@ -45,8 +46,8 @@ class Gene:
 
 
 class NeuralNet:
-   def __init__(self):
-       neurons = []
+    def __init__(self):
+       self.neurons = []
 
 
 class Neuron:

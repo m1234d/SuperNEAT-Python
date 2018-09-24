@@ -3,6 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="9807d40a-870c-4b0f-aa41-b619857c5c6d" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/Classes.py" beforeDir="false" afterPath="$PROJECT_DIR$/Classes.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/GeneticAlgo.py" beforeDir="false" afterPath="$PROJECT_DIR$/GeneticAlgo.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -32,25 +33,26 @@
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="py" value="528" />
+          <entry key="Python Console" value="230" />
+          <entry key="py" value="3411" />
           <entry key="txt" value="10" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="PLAIN_TEXT" value="10" />
-          <entry key="Python" value="528" />
+          <entry key="Python" value="3641" />
         </counts>
       </usages-collector>
     </session>
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/GeneticAlgo.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="19557">
-              <caret line="1124" column="23" selection-start-line="1124" selection-start-column="23" selection-end-line="1124" selection-end-column="23" />
+            <state relative-caret-position="305">
+              <caret line="784" column="32" selection-start-line="784" selection-start-column="32" selection-end-line="784" selection-end-column="32" />
               <folding>
                 <element signature="e#0#11#0" expanded="true" />
               </folding>
@@ -58,14 +60,14 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Classes.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="669">
-              <caret line="53" column="26" selection-start-line="53" selection-start-column="26" selection-end-line="53" selection-end-column="26" />
+            <state relative-caret-position="39">
+              <caret line="20" column="13" selection-start-line="20" selection-start-column="13" selection-end-line="20" selection-end-column="13" />
               <folding>
-                <marker date="1537756124826" expanded="true" signature="93:94" ph="..." />
-                <marker date="1537756124826" expanded="true" signature="1485:1490" ph="..." />
+                <marker date="1537756231955" expanded="true" signature="93:94" ph="..." />
+                <marker date="1537756231955" expanded="true" signature="1492:1497" ph="..." />
               </folding>
             </state>
           </provider>
@@ -89,10 +91,24 @@
       <find>new</find>
       <find>public</find>
       <find>row</find>
+      <find>Genome</find>
+      <find>.Rows[0]</find>
+      <find>NeuralNet</find>
+      <find>Console.WriteLine</find>
+      <find>List&lt;Gene&gt;</find>
+      <find>List&lt;Gene&gt;</find>
+      <find>bool[]</find>
+      <find>Gene[]</find>
+      <find>List&lt;Genome&gt;</find>
+      <find>Species</find>
+      <find>List&lt;Species&gt;</find>
+      <find>r.Next</find>
     </findStrings>
     <replaceStrings>
       <replace>math</replace>
       <replace>self.mutationRates</replace>
+      <replace>print</replace>
+      <replace>random.randint</replace>
     </replaceStrings>
   </component>
   <component name="Git.Settings">
@@ -101,8 +117,8 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/GeneticAlgo.py" />
         <option value="$PROJECT_DIR$/Classes.py" />
+        <option value="$PROJECT_DIR$/GeneticAlgo.py" />
       </list>
     </option>
   </component>
@@ -185,7 +201,7 @@
       <window_info anchor="bottom" id="Version Control" order="7" />
       <window_info anchor="bottom" id="Terminal" order="8" weight="0.36363637" />
       <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" />
-      <window_info anchor="bottom" id="Python Console" order="10" />
+      <window_info active="true" anchor="bottom" id="Python Console" order="10" visible="true" weight="0.32996634" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -218,23 +234,23 @@
     <option name="LAST_COMMIT_MESSAGE" value="Added file" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/GeneticAlgo.py">
+    <entry file="file://$PROJECT_DIR$/Classes.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="19557">
-          <caret line="1124" column="23" selection-start-line="1124" selection-start-column="23" selection-end-line="1124" selection-end-column="23" />
+        <state relative-caret-position="39">
+          <caret line="20" column="13" selection-start-line="20" selection-start-column="13" selection-end-line="20" selection-end-column="13" />
           <folding>
-            <element signature="e#0#11#0" expanded="true" />
+            <marker date="1537756231955" expanded="true" signature="93:94" ph="..." />
+            <marker date="1537756231955" expanded="true" signature="1492:1497" ph="..." />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Classes.py">
+    <entry file="file://$PROJECT_DIR$/GeneticAlgo.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="669">
-          <caret line="53" column="26" selection-start-line="53" selection-start-column="26" selection-end-line="53" selection-end-column="26" />
+        <state relative-caret-position="305">
+          <caret line="784" column="32" selection-start-line="784" selection-start-column="32" selection-end-line="784" selection-end-column="32" />
           <folding>
-            <marker date="1537756124826" expanded="true" signature="93:94" ph="..." />
-            <marker date="1537756124826" expanded="true" signature="1485:1490" ph="..." />
+            <element signature="e#0#11#0" expanded="true" />
           </folding>
         </state>
       </provider>
