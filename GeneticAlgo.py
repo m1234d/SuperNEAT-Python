@@ -5,7 +5,7 @@ from pyautogui import *
 
 Inputs = 10; #169 inputs and 1 bias
 Outputs = 9; #8 controller keys
-MaxNodes = 1000000;
+MaxNodes = 10000;
 
 Population = 300;
 Stale= 15;
@@ -51,9 +51,7 @@ def NewInnovation():
 
 #create a population pool
 def NewPool():
-
-
-    pool = Pool(List<Species>(), 0, Outputs, 0, 0, 0, 0);
+    pool = Pool([], 0, Outputs, 0, 0, 0, 0);
     return pool;
 
 
@@ -63,7 +61,7 @@ def NewSpecies():
     species = Species();
     species.topFitness = 0;
     species.staleness = 0;
-    species.genomes = List<Genome>();
+    species.genomes = []
     species.averageFitness = 0;
     return species;
 
@@ -146,7 +144,7 @@ def GenerateNetwork(genome):
     global Inputs
     global MaxNodes
     network = NeuralNet();
-    network.neurons = [] * (MaxNodes + Outputs)
+    network.neurons = [None] * (MaxNodes + Outputs)
     for i in range(MaxNodes + Outputs):
         network.neurons[i] = None;
 
@@ -296,13 +294,13 @@ def Crossover(ge1, ge2):
     for i in range(len(g1.genes)):
         gene1 = g1.genes[i];
         gene2 = innovations2[gene1.innovation];
-        if (gene2 != None and random.randint(1, 3) == 1 and gene2.enabled):
+        if (gene2 != None and random.randint(1, 2) == 1 and gene2.enabled):
             child.genes.append(CopyGene(gene2));
         else:
             child.genes.append(CopyGene(gene1));
         
     
-    child.maxneuron = math.max(g1.maxneuron, g2.maxneuron);
+    child.maxneuron = max(g1.maxneuron, g2.maxneuron);
     child.mutationRates = g1.mutationRates.copy()
 
     return child;
@@ -310,8 +308,10 @@ def Crossover(ge1, ge2):
 
 #get index of a random neuron in a genome
 def RandomNeuron(genes, nonInput):
-
-    neurons = bool[MaxNodes + Outputs];
+    global Inputs
+    global Outputs
+    global MaxNodes
+    neurons = [None] * (MaxNodes + Outputs)
     if (nonInput == False):
         for i in range(Inputs):
             neurons[i] = True;
@@ -322,7 +322,7 @@ def RandomNeuron(genes, nonInput):
     for i in range(len(genes)):
 
         if (nonInput == False or genes[i].into >= Inputs):
-        
+
             neurons[genes[i].into] = True;
         
         if (nonInput == False or genes[i].outo >= Inputs):
@@ -334,15 +334,14 @@ def RandomNeuron(genes, nonInput):
     for b in neurons:
         if (b):
             count+= 1
-        
-    
 
-    n = random.randint(0, count + 1);
+
+    n = random.randint(0, count);
     for i in range(len(neurons)):
         if (neurons[i]):
-        
             n-= 1
             if (n == 0):
+
                 return i;
 
     return 0;
@@ -390,13 +389,12 @@ def LinkMutate(genome, forceBias):
     
         n1 = RandomNeuron(genome.genes, False);
         n2 = RandomNeuron(genome.genes, True);
+
         #make sure not both inputs
         if (n1 < Inputs and n2 < Inputs):
-        
             continue;
-        
         break;
-    
+
 
     neuron1 = None
     neuron2 = None
@@ -425,18 +423,19 @@ def LinkMutate(genome, forceBias):
     
     newLink.innovation = NewInnovation();
     newLink.weight = random.random() * 4 - 2;
-    genome.genes.Add(newLink);
+    genome.genes.append(newLink);
 
 
 #create a neuron by splitting a link into two parts
 def NodeMutate(genome):
 
-    if (genome.genes.Count == 0):
+    if (len(genome.genes) == 0):
     
         return;
     
     genome.maxneuron = genome.maxneuron + 1;
-    gene = genome.genes[random.randint(0, genome.genes.Count)];
+    value = random.randint(0, len(genome.genes)-1)
+    gene = genome.genes[value];
     #cancel if gene isnt enabled
     if (gene.enabled == False):
     
@@ -467,11 +466,12 @@ def EnableDisableMutate(genome, enable):
             candidates.append(genome.genes[i]);
         
     
-    if (candidates.Count == 0):
+    if (len(candidates) == 0):
     
         return;
-    
-    gene = candidates[random.randint(0, candidates.Count)];
+
+    value = random.randint(0, len(candidates)-1)
+    gene = candidates[value];
     gene.enabled = not gene.enabled;
 
 
@@ -479,8 +479,8 @@ def EnableDisableMutate(genome, enable):
 def Mutate(genome):
 
     #alter genome's internal mutation rates
-    for i in range(len(genome.mutationRates)):
-        if (random.randint(0, 2) == 0):
+    for i,v in genome.mutationRates.items():
+        if (random.randint(0, 1) == 0):
         
             genome.mutationRates[i] = .95 * genome.mutationRates[i]
         
@@ -497,7 +497,6 @@ def Mutate(genome):
     while (p > 0):
     
         if (random.random() < p):
-        
             LinkMutate(genome, False);
         
         p = p - 1;
@@ -507,7 +506,6 @@ def Mutate(genome):
     while (p > 0):
     
         if (random.random() < p):
-        
             LinkMutate(genome, True);
         
         p = p - 1;
@@ -516,7 +514,7 @@ def Mutate(genome):
     while (p > 0):
     
         if (random.random() < p):
-        
+
             NodeMutate(genome);
         
         p = p - 1;
@@ -525,7 +523,6 @@ def Mutate(genome):
     while (p > 0):
     
         if (random.random() < p):
-        
             EnableDisableMutate(genome, True);
         
         p = p - 1;
@@ -534,7 +531,6 @@ def Mutate(genome):
     while (p > 0):
     
         if (random.random() < p):
-        
             EnableDisableMutate(genome, False);
         
         p = p - 1;
@@ -544,12 +540,12 @@ def Mutate(genome):
 #disjopart of species distance equation
 def Disjoint(genes1, genes2):
 
-    i1 = [] * (pool.innovation + 100);
+    i1 = [None] * (pool.innovation + 100);
     for i in range(len(genes1)):
         gene = genes1[i];
         i1[gene.innovation] = True;
     
-    i2 = [] * (pool.innovation + 100)
+    i2 = [None] * (pool.innovation + 100)
     for i in range(len(genes2)):
         gene = genes2[i];
         i2[gene.innovation] = True;
@@ -568,7 +564,7 @@ def Disjoint(genes1, genes2):
             disjointGenes = disjointGenes + 1;
         
     
-    n = math.max(len(genes1), len(genes2));
+    n = max(len(genes1), len(genes2));
     if (n == 0):
     
         n = 1;
@@ -578,12 +574,10 @@ def Disjoint(genes1, genes2):
 
 #weight part of species distance equation
 def Weights(genes1, genes2):
-
-    i2 = Gene[pool.innovation + 100];
+    i2 = [None] * (pool.innovation + 100)
     for i in range(len(genes2)):
         gene = genes2[i];
         i2[gene.innovation] = gene;
-    
     sum = 0;
     coincident = 0;
     for i in range(len(genes1)):
@@ -591,9 +585,10 @@ def Weights(genes1, genes2):
         if i2[gene.innovation] != None:
         
             gene2 = i2[gene.innovation];
-            sum = sum + math.Abs(gene.weight - gene2.weight);
+            sum = sum + abs(gene.weight - gene2.weight);
             coincident = coincident + 1;
-        
+    if coincident == 0:
+        return 1000000
     
     return (sum / coincident);
 
@@ -666,13 +661,13 @@ def BreedChild(species):
     child = None
     if (random.random() < CrossoverChance):
     
-        g1 = species.genomes[random.randint(0, species.genomes.Count)];
-        g2 = species.genomes[random.randint(0, species.genomes.Count)];
+        g1 = species.genomes[random.randint(0, len(species.genomes)-1)];
+        g2 = species.genomes[random.randint(0, len(species.genomes)-1)];
         child = Crossover(g1, g2);
     
     else:
     
-        g = species.genomes[random.randint(0, species.genomes.Count)];
+        g = species.genomes[random.randint(0, len(species.genomes)-1)];
         child = CopyGenome(g);
     
     Mutate(child);
@@ -767,9 +762,9 @@ def NewGeneration():
     #eliminate all but the best members of each species
     CullSpecies(True);
     #breed the top members until population is full again
-    while (len(childreN) + len(pool.species) < Population):
+    while (len(children) + len(pool.species) < Population):
     
-        species = pool.species[random.randint(0, len(pool.species))];
+        species = pool.species[random.randint(0, len(pool.species)-1)];
         children.append(BreedChild(species));
     
     #add all the children to the species
@@ -786,6 +781,7 @@ def InitializePool():
     global pool
     pool = NewPool();
     for i in range(Population):
+        print(i)
         basic = BasicGenome();
         AddToSpecies(basic);
     
@@ -1027,9 +1023,10 @@ def FitnessAlreadyMeasured():
 #main training loop
 def Run():
     global pool
+    print("Initializing pool.")
     InitializePool();   
     while (True):
-    
+        print("Next generation")
         #cycle through genomes until unmeasured one is found
         while (FitnessAlreadyMeasured()):
         
@@ -1038,8 +1035,9 @@ def Run():
         #select genome and species
         species = pool.species[pool.currentSpecies];
         genome = species.genomes[pool.currentGenome];
+
         #evaluate
-        tt = [pool.currentSpecies, pool.current];
+        tt = [pool.currentSpecies, pool.currentGenome];
         EvaluateCurrent(tt);
 
     
