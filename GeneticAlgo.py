@@ -1,9 +1,9 @@
 import math
 import random
 from Classes import *
-from pyautogui import *
+from keys import *
 
-Inputs = 10; #169 inputs and 1 bias
+Inputs = 170; #169 inputs and 1 bias
 Outputs = 9; #8 controller keys
 MaxNodes = 10000;
 
@@ -35,11 +35,28 @@ rPressed = False;
 
 ThreadCount = 0;
 
+inputs = []
+marioX = 0
+isAlive = 0
+import win32gui
+ 
+def windowEnumerationHandler(hwnd, top_windows):
+    top_windows.append((hwnd, win32gui.GetWindowText(hwnd)))
+ 
+def setFocus(name):
+    results = []
+    top_windows = []
+    win32gui.EnumWindows(windowEnumerationHandler, top_windows)
+    for i in top_windows:
+        if name in i[1].lower():
+            win32gui.ShowWindow(i[0],5)
+            win32gui.SetForegroundWindow(i[0])
+            break
 
 #activation function for each neuron
 def Sigmoid(x):
 
-    return 2 / (1 + math.pow(math.E, (-4.9 * x))) - 1;
+    return 2 / (1 + math.pow(math.e, (-4.9 * x))) - 1;
 
 
 #returns a unique index for a connection, used in crossover
@@ -154,7 +171,7 @@ def GenerateNetwork(genome):
     for o in range(Outputs):
         network.neurons[MaxNodes + o] = NewNeuron();
     
-    genome.genes = sorted(genome.genes, lambda x: x.outo)
+    genome.genes = sorted(genome.genes, key=lambda x: x.outo)
     for i in range(len(genome.genes)):
         gene = genome.genes[i];
         if (gene.enabled):
@@ -178,6 +195,7 @@ def GenerateNetwork(genome):
 def EvaluateNetwork(network, inputs):
 
     inputs.append(1);
+
     if (len(inputs) != Inputs):
     
         print("Incorrect number of neural network inputs.");
@@ -196,7 +214,7 @@ def EvaluateNetwork(network, inputs):
             other = network.neurons[incoming.into];
             sum += (incoming.weight * other.value);
 
-        if (neuron.incoming.Count > 0):
+        if (len(neuron.incoming) > 0):
         
             neuron.value = Sigmoid(sum);
         
@@ -239,7 +257,7 @@ def EvaluateNetworkDouble(network, inputs, side):
             other = network.neurons[incoming.into];
             sum += (incoming.weight * other.value);
         
-        if (neuron.incoming.Count > 0):
+        if (len(neuron.incoming) > 0):
         
             neuron.value = Sigmoid(sum);
         
@@ -611,7 +629,7 @@ def RankGlobally():
 
             globalList.append(species.genomes[g]);
         
-    globalList = sorted(globalList, lambda x : x.fitness)
+    globalList = sorted(globalList, key=lambda x : x.fitness)
     for g in range(len(globalList)):
 
         globalList[g].globalRank = g + 1;
@@ -626,7 +644,7 @@ def CalculateAverageFitness(species):
         genome = species.genomes[g];
         total = total + genome.globalRank;
     
-    species.averageFitness = total / species.genomes.Count;
+    species.averageFitness = total / len(species.genomes);
 
 
 #calculate the total of all average fitnesses
@@ -645,7 +663,7 @@ def CullSpecies(cutToOne):
 
     for s in range(len(pool.species)):
         species = pool.species[s];
-        species.genomes = sorted(species.genomes, lambda x: x.fitness, reverse=True)
+        species.genomes = sorted(species.genomes, key=lambda x: x.fitness, reverse=True)
         remaining = math.ceil(len(species.genomes) / 2.0);
         if (cutToOne):
             remaining = 1;
@@ -680,7 +698,7 @@ def RemoveStaleSpecies():
     survived = []
     for s in range(len(pool.species)):
         species = pool.species[s];
-        species.genomes = sorted(species.genomes, lambda x: x.fitness, reverse=True)
+        species.genomes = sorted(species.genomes, key=lambda x: x.fitness, reverse=True)
         if (species.genomes[0].fitness > species.topFitness):
         
             species.topFitness = species.genomes[0].fitness;
@@ -722,7 +740,7 @@ def AddToSpecies(child):
         species = pool.species[s];
         if (found== False and SameSpecies(child, species.genomes[0])):
         
-            species.genomes.Add(child);
+            species.genomes.append(child);
             found= True;
         
     
@@ -753,7 +771,7 @@ def NewGeneration():
     for s in range(len(pool.species)):
     
         species = pool.species[s];
-        breed = math.Floor(species.averageFitness / sum * Population) - 1;
+        breed = math.floor(species.averageFitness / sum * Population) - 1;
         for i in range(breed):
 
             children.append(BreedChild(species));
@@ -797,7 +815,7 @@ def InitializeRun():
 
 #evaluate the fitness of the current genome
 def EvaluateCurrent(d):
-
+    global ThreadCount
     data = d;
     sp = data[0];
     g = data[1];
@@ -816,6 +834,11 @@ def EvaluateMario():
     global dPressed
     global lPressed
     global rPressed
+    
+    global inputs
+    global marioX
+    global isAlive
+    
     species = pool.species[pool.currentSpecies];
     genome = species.genomes[pool.currentGenome];
     GenerateNetwork(genome);
@@ -827,164 +850,163 @@ def EvaluateMario():
     # Form1.SpeciesTot = pool.species.Count;
     # Form1.CurrentGen = pool.generation;
     # Form1.OverrideBest(genome);
-
+    while(isAlive == 1):
+        pass
+        
     fitness = 0;
-    while (Form1.alive):
-        Form1.ActivateApp("EmuHawk");
-        inputt = [[]]
-        for i in range(len(Form1.inputs)):
-            inputt.append([])
-        inputs = []
-        Form1.inputs = inputt.copy()
-        for i in range(len(inputt)):
-            for p in range(len(inputt[0])):
-                inputs.append(inputt[i][p]);
+    while (isAlive == 0): #isAlive is set by main.py
+        setFocus("EmuHawk");
 
 
         #get buttons to press
-        output = EvaluateNetwork(genome.network, inputs);
+        inputs2 = []
+        for i in range(len(inputs)):
+            for j in range(len(inputs[i])):
+                inputs2.append(inputs[i][j])
+        output = EvaluateNetwork(genome.network, inputs2);
         if(fitness == 0 and output[7] == False):
 
-            Form1.alive = False;
+            isAlive = 1;
 
-        str = "";
+        str1 = "";
         if (output[0] == True):
 
-            str += "x";
+            str1 += "x";
 
         if (output[1] == True):
 
-            str += "s";
+            str1 += "s";
 
         if (output[2] == True):
 
-            str += "a";
+            str1 += "a";
 
         if (output[3] == True):
 
-            str += "z";
+            str1 += "z";
 
         if (output[4] == True):
 
-            str += "u";
+            str1 += "u";
 
         if (output[5] == True):
 
-            str += "d";
+            str1 += "d";
 
         if (output[6] == True):
 
-            str += "l";
+            str1 += "l";
 
         if (output[7] == True):
 
-            str += "r";
+            str1 += "r";
 
-        Form1.InputString = str;
+        inputString = str1;
+        print(inputString)
         if (output[0] == True and xPressed == False):
-            keyDown('x')
+            keyDown(VK_X)
             xPressed = True;
 
         elif (xPressed):
-            keyUp('x')
+            keyUp(VK_X)
             xPressed = False;
 
         if (output[1] == True and sPressed == False):
-            keyDown('s')
+            keyDown(VK_S)
             sPressed = True;
 
         elif (sPressed):
-            keyUp('s')
+            keyUp(VK_S)
             sPressed = False;
 
         if (output[2] == True and aPressed == False):
-            keyDown('a')
+            keyDown(VK_A)
             aPressed = True;
 
         elif (aPressed):
-            keyUp('a')
+            keyUp(VK_A)
             aPressed = False;
 
         if (output[3] == True and zPressed == False):
-            keyDown('z')
+            keyDown(VK_Z)
             zPressed = True;
 
         elif (zPressed):
-            keyUp('z')
+            keyUp(VK_Z)
             zPressed = False;
 
         if (output[4] == True and uPressed == False):
-            keyDown('h')
+            keyDown(VK_U)
             uPressed = True;
 
         elif (output[4] == False and uPressed):
-            keyUp('h')
+            keyUp(VK_U)
             uPressed = False;
 
         if (output[5] == True and dPressed == False):
-            keyDown('b')
+            keyDown(VK_D)
             dPressed = True;
 
         elif (output[5] == False and dPressed):
-            keyUp('d')
+            keyUp(VK_D)
             dPressed = False;
 
         if (output[6] == True and lPressed == False):
-            keyDown('l')
+            keyDown(VK_L)
             lPressed = True;
 
         elif (output[6] == False and lPressed):
-            keyUp('l')
+            keyUp(VK_L)
             lPressed = False;
 
         if (output[7] == True and rPressed == False):
-            keyDown('r')
+            keyDown(VK_R)
             rPressed = True;
 
         elif (output[7] == False and rPressed):
-            keyUp('r')
+            keyUp(VK_R)
             rPressed = False;
         
     
     if (xPressed):
-        keyUp('x')
+        keyUp(VK_X)
         xPressed = False;
     
     if (sPressed):
-        keyUp('s')
+        keyUp(VK_S)
         sPressed = False;
     
     if (aPressed):
-        keyUp('a')
+        keyUp(VK_A)
         aPressed = False;
     
     if (zPressed):
-        keyUp('z')
+        keyUp(VK_Z)
         zPressed = False;
     
     if (uPressed):
-        keyUp('u')
+        keyUp(VK_U)
         uPressed = False;
     
     if (dPressed):
-        keyUp('d')
+        keyUp(VK_D)
         dPressed = False;
     
     if (lPressed):
-        keyUp('l')
+        keyUp(VK_L)
         lPressed = False;
     
     if (rPressed):
-        keyUp('r')
+        keyUp(VK_R)
         rPressed = False;
     
 
-    fitness = Form1.marioX;
+    fitness = marioX;
     if (fitness <= 0):
     
         fitness = -1;
     
-    print("Fitness:" + fitness);
+    print("Fitness:" + str(fitness));
     genome.fitness = fitness;
     if (genome.fitness > pool.maxFitness):
     
@@ -995,18 +1017,18 @@ def EvaluateMario():
 #cycle through all the genomes
 def NextGenome():
     global ThreadCount
-    pool.current= pool.current+ 1;
-    if (pool.current>= len(pool.species[pool.currentSpecies].genomes)):
+    pool.currentGenome = pool.currentGenome + 1;
+    if (pool.currentGenome >= len(pool.species[pool.currentSpecies].genomes)):
     
-        pool.current= 0;
-        pool.current= pool.current+ 1;
-        if (pool.current>= len(pool.species.Count)):
+        pool.currentGenome = 0;
+        pool.currentSpecies = pool.currentSpecies + 1;
+        if (pool.currentSpecies >= len(pool.species)):
         
             ThreadCount = 0;
             NewGeneration();
             pool.best = None;
             pool.maxFitness = 0;
-            pool.current= 0;
+            pool.currentSpecies = 0;
         
     
 
@@ -1016,7 +1038,7 @@ def FitnessAlreadyMeasured():
     global pool
     species = pool.species[pool.currentSpecies];
     genome = species.genomes[pool.currentGenome];
-
+    
     return (genome.fitness != 0);
 
 
@@ -1026,10 +1048,8 @@ def Run():
     print("Initializing pool.")
     InitializePool();   
     while (True):
-        print("Next generation")
         #cycle through genomes until unmeasured one is found
         while (FitnessAlreadyMeasured()):
-        
             NextGenome();
         
         #select genome and species
@@ -1037,6 +1057,7 @@ def Run():
         genome = species.genomes[pool.currentGenome];
 
         #evaluate
+        print("Evaluating " + str(pool.currentSpecies) + ": " + str(pool.currentGenome))
         tt = [pool.currentSpecies, pool.currentGenome];
         EvaluateCurrent(tt);
 
